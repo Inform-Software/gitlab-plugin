@@ -40,6 +40,7 @@ import jenkins.model.Jenkins;
 public class GitLabConnection {
     private final String name;
     private final String url;
+    private final String globalWebhookURL;
     private transient String apiToken;
     // TODO make final when migration code gets removed
     private String apiTokenId;
@@ -49,10 +50,11 @@ public class GitLabConnection {
     private final Integer readTimeout;
     private transient GitLabClient apiCache;
 
-    public GitLabConnection(String name, String url, String apiTokenId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
+    public GitLabConnection(String name, String url, String globalWebhookURL, String apiTokenId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this(
             name,
             url,
+            globalWebhookURL,
             apiTokenId,
             new AutodetectGitLabClientBuilder(),
             ignoreCertificateErrors,
@@ -62,10 +64,11 @@ public class GitLabConnection {
     }
 
     @DataBoundConstructor
-    public GitLabConnection(String name, String url, String apiTokenId, String clientBuilderId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
+    public GitLabConnection(String name, String url, String globalWebhookURL, String apiTokenId, String clientBuilderId, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this(
             name,
             url,
+            globalWebhookURL,
             apiTokenId,
             getGitLabClientBuilderById(clientBuilderId),
             ignoreCertificateErrors,
@@ -75,9 +78,10 @@ public class GitLabConnection {
     }
 
     @Restricted(NoExternalUse.class)
-    public GitLabConnection(String name, String url, String apiTokenId, GitLabClientBuilder clientBuilder, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
+    public GitLabConnection(String name, String url, String globalWebhookURL, String apiTokenId, GitLabClientBuilder clientBuilder, boolean ignoreCertificateErrors, Integer connectionTimeout, Integer readTimeout) {
         this.name = name;
         this.url = url;
+        this.globalWebhookURL = globalWebhookURL;
         this.apiTokenId = apiTokenId;
         this.clientBuilder = clientBuilder;
         this.ignoreCertificateErrors = ignoreCertificateErrors;
@@ -91,6 +95,10 @@ public class GitLabConnection {
 
     public String getUrl() {
         return url;
+    }
+
+    public String getGlobalWebhookURL () {
+        return globalWebhookURL;
     }
 
     public String getApiTokenId() {
@@ -144,10 +152,10 @@ public class GitLabConnection {
 
     protected GitLabConnection readResolve() {
         if (connectionTimeout == null || readTimeout == null) {
-            return new GitLabConnection(name, url, apiTokenId, new AutodetectGitLabClientBuilder(), ignoreCertificateErrors, 10, 10);
+            return new GitLabConnection(name, url, globalWebhookURL, apiTokenId, new AutodetectGitLabClientBuilder(), ignoreCertificateErrors, 10, 10);
         }
         if (clientBuilder == null) {
-            return new GitLabConnection(name, url, apiTokenId, new AutodetectGitLabClientBuilder(), ignoreCertificateErrors, connectionTimeout, readTimeout);
+            return new GitLabConnection(name, url, globalWebhookURL, apiTokenId, new AutodetectGitLabClientBuilder(), ignoreCertificateErrors, connectionTimeout, readTimeout);
         }
 
         return this;

@@ -137,6 +137,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
     @RequirePOST
     @Restricted(DoNotUse.class) // WebOnly
     public FormValidation doTestConnection(@QueryParameter String url,
+                                           @QueryParameter String globalWebhookURL,
                                            @QueryParameter String apiTokenId,
                                            @QueryParameter String clientBuilderId,
                                            @QueryParameter boolean ignoreCertificateErrors,
@@ -144,7 +145,7 @@ public class GitLabConnectionConfig extends GlobalConfiguration {
                                            @QueryParameter int readTimeout) {
 	Jenkins.getActiveInstance().checkPermission(Jenkins.ADMINISTER);
         try {
-            new GitLabConnection("", url, apiTokenId, clientBuilderId, ignoreCertificateErrors, connectionTimeout, readTimeout).getClient(null, null).getCurrentUser();
+            new GitLabConnection("", url, globalWebhookURL, apiTokenId, clientBuilderId, ignoreCertificateErrors, connectionTimeout, readTimeout).getClient(null, null).getCurrentUser();
             return FormValidation.ok(Messages.connection_success());
         } catch (WebApplicationException e) {
             return FormValidation.error(Messages.connection_error(e.getMessage()));
